@@ -104,7 +104,14 @@ tr.tot td{border-top:2px solid var(--line);font-weight:800}
 
 /* calc card */
 .calc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 14px}
-.calc .part{background:var(--bg);border-radius:10px;padding:6px 12px;text-align:center}
+.calc .part{background:var(--bg);border-radius:10px;padding:6px 12px;text-align:center;cursor:text}
+.calc .part input{min-width:6ch;max-width:16ch;border:1px dashed var(--muted);background:var(--card);color:var(--ink);font:inherit;
+  font-weight:800;font-size:16px;text-align:center;direction:ltr;border-radius:8px;padding:2px 6px;margin-top:2px;font-variant-numeric:tabular-nums}
+.calc .part input:focus{outline:none;border:1px solid var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.calc .part input.changed{border:1px solid var(--c4);background:color-mix(in srgb,var(--c4) 14%,var(--card))}
+.calc-total b.chg{color:var(--c4)}
+.whatif{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:-4px 0 12px;padding:10px 14px;
+  border-radius:12px;background:color-mix(in srgb,var(--c4) 14%,var(--card));border:1px solid var(--c4);font-size:13.5px;font-weight:700}
 .calc .part small{display:block;color:var(--muted);font-size:11.5px;font-weight:600}
 .calc .part b{font-size:16px}
 .calc .op{color:var(--muted);font-weight:800;font-size:16px}
@@ -176,7 +183,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}
 </div>
 
 <script>
-const PAYLOAD = {"enc": 1, "salt": "L/ZJeQUZYtDWe9qsO7w+xA==", "iv": "V+X08825MSEVq/UV", "iter": 250000, "ct": "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"};
+const PAYLOAD = {"enc": 1, "salt": "enh9i84dwELNaukjEGjuCQ==", "iv": "QId+fDfduUjoRHd5", "iter": 250000, "ct": "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"};
 const fmt = n => Math.round(n).toLocaleString('en-US');
 const money = n => `<span class="num">${fmt(n)}</span><span class="cur">ج.م</span>`;
 const pct = (a, b) => b ? (a / b * 100) : 0;
@@ -287,16 +294,43 @@ function renderReceivables(D){
 }
 
 // ------------------------------------------------------------ generic workbook
-function renderGeneric(D){
-  const nets = D.sheets.flatMap(s => s.kpis.map(k => ({...k, sheet: s.name})));
-  const totalNet = nets.reduce((s,k) => s + k.value, 0);
-  const kpis = `<section class="kpis">
-    ${nets.length > 1 ? `<div class="card kpi hero"><div class="lbl">إجمالي الصافي</div><div class="val">${money(totalNet)}</div>
-      <div class="hint">${D.sheets.length} شغلانات</div></div>` : ''}
-    ${nets.map((k,i) => `<div class="card kpi"><div class="lbl"><span class="dot" style="background:${col(i)}"></span>${esc(k.label)} — ${esc(k.sheet)}</div>
-      <div class="val">${money(k.value)}</div>${nets.length > 1 ? `<div class="hint">${pct(k.value,totalNet).toFixed(0)}% من إجمالي الصافي</div>` : ''}</div>`).join('')}
-  </section>`;
+// calc-card numbers are editable for what-if; nothing is written back to Excel
+const GEN = [];
+const clone = o => JSON.parse(JSON.stringify(o));
+const fmtIn = n => n.toLocaleString('en-US', {maximumFractionDigits: 2});
+const parseIn = s => { const v = parseFloat(String(s).replace(/[,\s]/g, '')); return isNaN(v) ? 0 : v; };
+const isDirty = (s, o) => s.regions.some((r,ri) => r.kind === 'calc' && r.parts.some((p,pi) => p.value !== o.regions[ri].parts[pi].value));
 
+function genKpis(g){
+  const nets = GEN[g].D.sheets.flatMap(s => s.kpis.map(k => ({...k, sheet: s.name})));
+  const totalNet = nets.reduce((s,k) => s + k.value, 0);
+  return `${nets.length > 1 ? `<div class="card kpi hero"><div class="lbl">إجمالي الصافي</div><div class="val">${money(totalNet)}</div>
+      <div class="hint">${GEN[g].D.sheets.length} شغلانات</div></div>` : ''}
+    ${nets.map((k,i) => `<div class="card kpi"><div class="lbl"><span class="dot" style="background:${col(i)}"></span>${esc(k.label)} — ${esc(k.sheet)}</div>
+      <div class="val ${k.value < 0 ? 'neg' : ''}">${money(k.value)}</div>${nets.length > 1 ? `<div class="hint">${pct(k.value,totalNet).toFixed(0)}% من إجمالي الصافي</div>` : ''}</div>`).join('')}`;
+}
+
+function genWaterfall(k){
+  const top = Math.max(...k.steps.filter(s => s.sign > 0).map(s => s.value), Math.abs(k.value), 1);
+  let run = 0;
+  const rows = k.steps.map(s => {
+    const start = Math.max(s.sign > 0 ? run : run - s.value, 0);
+    run += s.sign * s.value;
+    return `<div class="wf-row"><div class="name">${esc(s.label)}</div>
+      <div class="track"><div class="wf-seg" style="inset-inline-start:${pct(start,top)}%;width:0" data-w="${Math.min(pct(s.value,top),100)}"
+        data-bg="${s.sign > 0 ? 'var(--accent)' : 'var(--neg)'}"></div></div>
+      <div class="amt num ${s.sign < 0 ? 'neg' : ''}">${s.sign < 0 ? '−' : '+'}${fmt(s.value)}</div></div>`;
+  }).join('');
+  return `<h2>من الإيراد للصافي</h2><div class="desc">كل خصم بيتطرح من ${esc(k.steps[0].label)} لحد ما نوصل لـ${esc(k.label)}</div>
+    <div class="wf">${rows}<div class="wf-row res"><div class="name">${esc(k.label)}</div>
+      <div class="track"><div class="wf-seg" style="inset-inline-start:0;width:0" data-w="${Math.min(pct(Math.abs(k.value),top),100)}"
+        data-bg="${k.value < 0 ? 'var(--neg)' : 'var(--pos)'}"></div></div>
+      <div class="amt num ${k.value < 0 ? 'neg' : 'pos'}" style="font-size:16px">${fmt(k.value)}</div></div></div>`;
+}
+
+function genSheet(g, si){
+  const s = GEN[g].D.sheets[si], o = GEN[g].orig.sheets[si];
+  const id = `${g}-${si}`;
   const cell = (c, emph) => !c ? '<td></td>' : 'n' in c
     ? `<td class="num${emph ? ' em' : ''}">${fmt(c.n)}</td>` : `<td>${esc(c.s)}</td>`;
 
@@ -306,36 +340,73 @@ function renderGeneric(D){
     ${r.totals ? `<tr class="tot">${r.columns.map((h,i) => i === 0 ? '<td>الإجمالي</td>' :
         (i in r.totals ? `<td class="num em">${fmt(r.totals[i])}</td>` : '<td></td>')).join('')}</tr>` : ''}</table></div>`;
 
-  const calc = r => `<div class="card"><h2>${esc(r.title || r.total_label)}</h2><div class="desc">${r.op === 'x' ? 'حاصل ضرب' : 'مجموع'} البنود</div>
-    <div class="calc">${r.parts.map((p,i) => `${i ? `<span class="op">${r.op === 'x' ? '×' : '+'}</span>` : ''}
-      <div class="part"><small>${esc(p.label)}</small><b class="num">${fmt(p.value)}</b></div>`).join('')}</div>
-    ${r.op === '+' ? bars(r.parts.map(p => ({name: p.label, value: p.value})), r.total, (x,i) => col(i)) : ''}
-    <div class="calc-total" style="${r.op === '+' ? 'margin-top:14px' : ''}"><span>${esc(r.total_label)}</span><b>${money(r.total)}</b></div></div>`;
+  const calcBars = r => r.op === '+' ? bars(r.parts.map(p => ({name: p.label, value: p.value})), r.total, (x,i) => col(i)) : '';
+  const calc = (r, ri) => `<div class="card"><h2>${esc(r.title || r.total_label)}</h2>
+    <div class="desc">${r.op === 'x' ? 'حاصل ضرب' : 'مجموع'} البنود — دوس على أي رقم وغيّره</div>
+    <div class="calc">${r.parts.map((p,pi) => `${pi ? `<span class="op">${r.op === 'x' ? '×' : '+'}</span>` : ''}
+      <label class="part"><small>${esc(p.label)}</small><input class="part-in${p.value !== o.regions[ri].parts[pi].value ? ' changed' : ''}"
+        inputmode="decimal" value="${fmtIn(p.value)}" style="width:${fmtIn(p.value).length + 3}ch"
+        data-g="${g}" data-s="${si}" data-r="${ri}" data-p="${pi}" title="الأصلي: ${fmtIn(o.regions[ri].parts[pi].value)}"></label>`).join('')}</div>
+    <div id="gb-${id}-${ri}">${calcBars(r)}</div>
+    <div class="calc-total" style="${r.op === '+' ? 'margin-top:14px' : ''}"><span>${esc(r.total_label)}</span>
+      <b id="gt-${id}-${ri}" class="${r.total !== o.regions[ri].total ? 'chg' : ''}">${money(r.total)}</b></div></div>`;
 
-  const waterfall = k => {
-    const top = Math.max(...k.steps.filter(s => s.sign > 0).map(s => s.value), k.value, 1);
-    let run = 0;
-    const rows = k.steps.map(s => {
-      const start = s.sign > 0 ? run : run - s.value;
-      run += s.sign * s.value;
-      return `<div class="wf-row"><div class="name">${esc(s.label)}</div>
-        <div class="track"><div class="wf-seg" style="inset-inline-start:${pct(start,top)}%;width:0" data-w="${pct(s.value,top)}"
-          data-bg="${s.sign > 0 ? 'var(--accent)' : 'var(--neg)'}"></div></div>
-        <div class="amt num ${s.sign < 0 ? 'neg' : ''}">${s.sign < 0 ? '−' : '+'}${fmt(s.value)}</div></div>`;
-    }).join('');
-    return `<div class="card" style="grid-column:1/-1"><h2>من الإيراد للصافي</h2><div class="desc">كل خصم بيتطرح من ${esc(k.steps[0].label)} لحد ما نوصل لـ${esc(k.label)}</div><div class="wf">${rows}
-      <div class="wf-row res"><div class="name">${esc(k.label)}</div>
-        <div class="track"><div class="wf-seg" style="inset-inline-start:0;width:0" data-w="${pct(k.value,top)}" data-bg="var(--pos)"></div></div>
-        <div class="amt num pos" style="font-size:16px">${fmt(k.value)}</div></div></div></div>`;
-  };
-
-  return kpis + D.sheets.map(s => `
-    <h3 class="sec">${esc(s.name)}</h3>
+  return `<h3 class="sec">${esc(s.name)}</h3>
+    <div class="whatif" id="gx-${id}" style="${isDirty(s, o) ? '' : 'display:none'}">
+      <span>⚠ أرقام تجريبية — مش متسجّلة في الإكسل</span><button data-reset="${id}">رجّع الأرقام الأصلية</button></div>
     <section class="grid g-auto">
-      ${s.kpis.filter(k => k.steps).map(waterfall).join('')}
-      ${s.regions.map(r => r.kind === 'calc' ? calc(r) : table(r)).join('')}
-    </section>`).join('');
+      ${s.kpis.map((k,ki) => k.steps ? `<div class="card" style="grid-column:1/-1" id="gw-${id}-${ki}">${genWaterfall(k)}</div>` : '').join('')}
+      ${s.regions.map((r,ri) => r.kind === 'calc' ? calc(r, ri) : table(r)).join('')}
+    </section>`;
 }
+
+function renderGeneric(D){
+  const g = GEN.length;
+  GEN.push({D: clone(D), orig: D});
+  return `<section class="kpis" id="gk-${g}">${genKpis(g)}</section>` +
+    D.sheets.map((s,si) => `<div id="gs-${g}-${si}">${genSheet(g, si)}</div>`).join('');
+}
+
+function genRecompute(g, si){
+  const s = GEN[g].D.sheets[si], o = GEN[g].orig.sheets[si], id = `${g}-${si}`;
+  s.regions.forEach((r,ri) => {
+    if (r.kind !== 'calc') return;
+    r.total = r.op === 'x' ? r.parts.reduce((a,p) => a * p.value, 1) : r.parts.reduce((a,p) => a + p.value, 0);
+    const t = $(`gt-${id}-${ri}`); t.innerHTML = money(r.total); t.classList.toggle('chg', r.total !== o.regions[ri].total);
+    if (r.op === '+') { const b = $(`gb-${id}-${ri}`);
+      b.innerHTML = bars(r.parts.map(p => ({name: p.label, value: p.value})), r.total, (x,i) => col(i)); animate(b); }
+  });
+  s.kpis.forEach((k,ki) => {
+    if (!k.steps) return;
+    k.steps.forEach(st => st.value = s.regions[st.region].total);
+    k.value = k.steps.reduce((a,st) => a + st.sign * st.value, 0);
+    const w = $(`gw-${id}-${ki}`); w.innerHTML = genWaterfall(k); animate(w);
+  });
+  $(`gk-${g}`).innerHTML = genKpis(g);
+  $(`gx-${id}`).style.display = isDirty(s, o) ? '' : 'none';
+}
+
+document.addEventListener('input', e => {
+  const t = e.target; if (!t.classList.contains('part-in')) return;
+  const {g, s, r, p} = t.dataset;
+  const part = GEN[g].D.sheets[s].regions[r].parts[p];
+  part.value = parseIn(t.value);
+  t.style.width = (t.value.length + 3) + 'ch';
+  t.classList.toggle('changed', part.value !== GEN[g].orig.sheets[s].regions[r].parts[p].value);
+  genRecompute(+g, +s);
+});
+document.addEventListener('focusout', e => {
+  const t = e.target; if (!t.classList.contains('part-in')) return;
+  t.value = fmtIn(parseIn(t.value)); t.style.width = (t.value.length + 3) + 'ch';
+});
+document.addEventListener('focusin', e => { if (e.target.classList.contains('part-in')) e.target.select(); });
+document.addEventListener('click', e => {
+  const id = e.target.dataset && e.target.dataset.reset; if (!id) return;
+  const [g, si] = id.split('-').map(Number);
+  GEN[g].D.sheets[si] = clone(GEN[g].orig.sheets[si]);
+  const box = $(`gs-${id}`); box.innerHTML = genSheet(g, si); animate(box);
+  $(`gk-${g}`).innerHTML = genKpis(g);
+});
 
 // ------------------------------------------------------------ boot
 function animate(scope){
