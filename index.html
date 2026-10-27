@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة الحسابات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#152033; --muted:#6b7689; --line:#e3e8f0;
+  --accent:#1f6feb; --accent-soft:#e6efff;
+  --pos:#12805c; --pos-soft:#e3f5ee; --neg:#c2410c; --neg-soft:#fdeee6;
+  --c1:#1f6feb; --c2:#0ea5a4; --c3:#7c3aed; --c4:#d97706; --c5:#64748b; --c6:#db2777;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 16px rgba(16,24,40,.06);
+}
+:root[data-theme="dark"]{
+  --bg:#0d1320; --card:#151d2e; --ink:#e8edf6; --muted:#93a0b6; --line:#25304a;
+  --accent:#5b9bff; --accent-soft:#1c2c4d;
+  --pos:#34c38f; --pos-soft:#133328; --neg:#fb8a4f; --neg-soft:#3a2216;
+  --c1:#5b9bff; --c2:#2dd4bf; --c3:#a78bfa; --c4:#fbbf24; --c5:#94a3b8; --c6:#f472b6;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:13px}
+.tools{display:flex;gap:8px;align-items:center}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:10px;padding:7px 14px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.cur{font-size:.62em;color:var(--muted);font-weight:600;margin-inline-start:4px}
+
+/* tabs */
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.tab{border:0;background:none;border-radius:0;padding:10px 16px 12px;font-size:15px;font-weight:700;color:var(--muted);
+  border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.panel{display:none}.panel.on{display:block}
+.panel-meta{color:var(--muted);font-size:12.5px;margin:-8px 2px 14px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow)}
+.kpi .lbl{color:var(--muted);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.kpi .dot{width:9px;height:9px;border-radius:50%}
+.kpi .val{font-size:30px;font-weight:800;margin-top:6px;line-height:1.2}
+.kpi .hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+.kpi.hero{background:linear-gradient(135deg,var(--accent),#3b4fd8);color:#fff;border:0}
+.kpi.hero .lbl,.kpi.hero .hint,.kpi.hero .cur{color:rgba(255,255,255,.82)}
+
+.grid{display:grid;gap:16px;margin-bottom:16px}
+.g-2{grid-template-columns:1.35fr 1fr}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-auto{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+h2{font-size:16px;margin:0 0 4px;font-weight:700}
+h3.sec{margin:26px 4px 12px;font-size:18px;display:flex;align-items:center;gap:10px}
+.card .desc{color:var(--muted);font-size:12.5px;margin-bottom:14px}
+
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:grid;grid-template-columns:96px 1fr 128px;align-items:center;gap:12px;font-size:14px}
+.bar-row .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:14px;background:var(--bg);border-radius:7px;overflow:hidden;position:relative}
+.fill{height:100%;border-radius:7px;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.bar-row .amt{text-align:left;font-weight:700}
+.bar-row .pct{color:var(--muted);font-weight:500;font-size:12px;margin-inline-end:6px}
+
+.donut-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center}
+.legend{display:flex;flex-direction:column;gap:8px;font-size:13.5px;min-width:170px}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend i{width:11px;height:11px;border-radius:3px;flex:none}
+.legend .l-amt{margin-inline-start:auto;color:var(--muted);font-weight:600}
+
+.balance{display:flex;flex-direction:column;gap:14px}
+.stack{display:flex;height:40px;border-radius:10px;overflow:hidden;background:var(--bg)}
+.stack span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden}
+.bal-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.bal-legend b{color:var(--ink)}
+
+.co-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:10px}
+.co-name{font-size:18px;font-weight:800;letter-spacing:.3px}
+.co-total{font-size:20px;font-weight:800;white-space:nowrap}
+.chip{font-size:11.5px;padding:2px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.v,th.v{text-align:left}
+td.num{display:table-cell;direction:ltr;text-align:left}
+tr:last-child td{border-bottom:0}
+tr.tot td{border-top:2px solid var(--line);font-weight:800}
+.em{font-weight:800;color:var(--pos)}
+.note{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--bg);font-size:12.5px;color:var(--muted)}
+.note b{color:var(--ink)}
+.progress{height:10px;border-radius:5px;background:var(--neg-soft);overflow:hidden;margin:6px 0 4px}
+.progress div{height:100%;background:var(--pos);border-radius:5px;width:0;transition:width .9s}
+.pp{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.mini{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.mini span{font-size:12px;background:var(--bg);border-radius:8px;padding:3px 9px}
+
+/* calc card */
+.calc{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0 14px}
+.calc .part{background:var(--bg);border-radius:10px;padding:6px 12px;text-align:center}
+.calc .part small{display:block;color:var(--muted);font-size:11.5px;font-weight:600}
+.calc .part b{font-size:16px}
+.calc .op{color:var(--muted);font-weight:800;font-size:16px}
+.calc-total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed var(--line);padding-top:10px}
+.calc-total>span{color:var(--muted);font-size:13px;font-weight:600}
+.calc-total b{font-size:22px;font-weight:800}
+
+/* waterfall */
+.wf{display:flex;flex-direction:column;gap:10px}
+.wf-row{display:grid;grid-template-columns:110px 1fr 130px;gap:12px;align-items:center;font-size:14px}
+.wf-row .name{font-weight:600}
+.wf-row .track{height:22px;border-radius:6px}
+.wf-seg{position:absolute;top:0;bottom:0;border-radius:6px;transition:width .9s}
+.wf-row .amt{text-align:left;font-weight:700}
+.wf-row.res{border-top:1px dashed var(--line);padding-top:10px}
+
+.tbl-all td:first-child{font-weight:600}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:6px;font-weight:700}
+.tag.co{background:var(--accent-soft);color:var(--accent)}
+.tag.pe{background:var(--pos-soft);color:var(--pos)}
+.tag.db{background:var(--neg-soft);color:var(--neg)}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}
+
+/* lock screen */
+#lock{min-height:100vh;display:none;align-items:center;justify-content:center;padding:16px}
+#lock form{width:100%;max-width:360px;text-align:center}
+#lock h1{font-size:22px;margin:8px 0 4px}
+#lock input[type=password]{width:100%;font:inherit;font-size:16px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);margin:16px 0 10px;text-align:center;direction:ltr}
+#lock button{width:100%;padding:11px;font-size:15px;font-weight:700;background:var(--accent);color:#fff;border:0}
+#lock label{display:flex;gap:6px;align-items:center;justify-content:center;font-size:13px;color:var(--muted);margin-top:12px}
+#lock .err{color:var(--neg);font-size:13px;min-height:20px}
+.lock-ico{width:52px;height:52px;border-radius:16px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center}
+
+@media (max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}.g-2,.g-3{grid-template-columns:1fr}}
+@media (max-width:520px){.wrap{padding:18px 16px 36px}.kpis{grid-template-columns:1fr}.kpi .val{font-size:26px}
+  h1{font-size:23px}.bar-row{grid-template-columns:72px 1fr 104px;gap:8px}.wf-row{grid-template-columns:84px 1fr 100px;gap:8px}}
+@media print{button,.tabs{display:none}.panel{display:block!important;page-break-after:always}body{background:#fff}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<div id="lock">
+  <form class="card" id="lockForm">
+    <div class="lock-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    <h1>لوحة الحسابات</h1>
+    <div class="sub">البيانات متشفّرة — ادخل الباسورد</div>
+    <input type="password" id="pw" autocomplete="current-password" autofocus>
+    <div class="err" id="pwErr"></div>
+    <button type="submit">فتح</button>
+    <label><input type="checkbox" id="remember" checked> تذكرني على الجهاز ده</label>
+  </form>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <header>
+    <div>
+      <h1>لوحة الحسابات</h1>
+      <div class="sub" id="meta"></div>
+    </div>
+    <div class="tools">
+      <button id="themeBtn">الوضع الليلي</button>
+      <button onclick="window.print()">طباعة / PDF</button>
+      <button id="logoutBtn" style="display:none">قفل</button>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="panels"></main>
+</div>
+
+<script>
+const PAYLOAD = {"enc": 1, "salt": "T+JOth/o6lH1jz1llb5whg==", "iv": "cJt3W29x9yCwR0J8", "iter": 250000, "ct": "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"};
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const money = n => `<span class="num">${fmt(n)}</span><span class="cur">ج.م</span>`;
+const pct = (a, b) => b ? (a / b * 100) : 0;
+const col = i => `var(--c${i % 6 + 1})`;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const store = { get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+                set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }, del(k){ try{ localStorage.removeItem(k) }catch(e){} } };
+
+// theme
+const root = document.documentElement;
+function setTheme(t){ root.dataset.theme = t; $('themeBtn').textContent = t === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'; store.set('acc-theme', t); }
+setTheme(store.get('acc-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+$('themeBtn').onclick = () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+
+function bars(rows, total, color){
+  const max = Math.max(...rows.map(r => r.value), 1);
+  return `<div class="bars">${rows.map((r,i) => `
+    <div class="bar-row" title="${esc(r.name)}: ${fmt(r.value)}">
+      <div class="name">${esc(r.name)}</div>
+      <div class="track"><div class="fill" data-w="${pct(r.value,max)}" style="background:${color(r,i)}"></div></div>
+      <div class="amt"><span class="pct">${pct(r.value,total).toFixed(1)}%</span><span class="num">${fmt(r.value)}</span></div>
+    </div>`).join('')}</div>`;
+}
+
+// ------------------------------------------------------------ receivables
+function renderReceivables(D){
+  const R = D.receivables.slice().sort((a,b) => b.value - a.value);
+  const DB = D.debts.slice().sort((a,b) => b.value - a.value);
+  const TR = D.total_receivable, TD = D.total_debt, NET = D.net;
+  const cos = R.filter(r => r.type === 'company');
+  const coSum = cos.reduce((s,r) => s + r.value, 0);
+
+  const donut = (() => {
+    const size = 190, r = 74, sw = 26, C = 2 * Math.PI * r; let off = 0;
+    const segs = R.map((x,i) => { const len = x.value / TR * C;
+      const s = `<circle cx="95" cy="95" r="${r}" fill="none" stroke="${col(i)}" stroke-width="${sw}"
+        stroke-dasharray="${Math.max(len-2,0)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 95 95)"><title>${esc(x.name)}: ${fmt(x.value)}</title></circle>`;
+      off += len; return s; }).join('');
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="توزيع المستحقات">
+        <circle cx="95" cy="95" r="${r}" fill="none" stroke="var(--bg)" stroke-width="${sw}"/>${segs}
+        <text x="50%" y="46%" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Cairo">شركات</text>
+        <text x="50%" y="60%" text-anchor="middle" font-size="22" font-weight="800" fill="var(--ink)" font-family="Cairo">${pct(coSum,TR).toFixed(0)}%</text>
+      </svg>
+      <div class="legend">${R.map((x,i) => `<div><i style="background:${col(i)}"></i>${esc(x.name)}<span class="l-amt num">${pct(x.value,TR).toFixed(0)}%</span></div>`).join('')}</div>`;
+  })();
+
+  const company = c => {
+    const d = c.detail; let body;
+    if (d.kind === 'contract') {
+      const p = pct(d.paid, d.due);
+      body = `
+        <div class="pp"><span>تم تحصيل <b class="num pos">${fmt(d.paid)}</b></span><span>من <b class="num">${fmt(d.due)}</b></span></div>
+        <div class="progress"><div data-w="${p}"></div></div>
+        <div class="pp"><span>${p.toFixed(0)}% محصّل</span><span>متبقي <b class="num neg">${fmt(c.value)}</b></span></div>
+        ${d.due_items.length > 1 ? `<table style="margin-top:10px"><tr><th>إجمالي المستحق</th><th class="v">المبلغ</th></tr>
+          ${d.due_items.map(i => `<tr><td>${esc(i.label)}</td><td class="num">${fmt(i.value)}</td></tr>`).join('')}</table>` : ''}
+        <div class="desc" style="margin:12px 0 0">الدفعات المستلمة (${d.paid_items.length})</div>
+        <div class="mini">${d.paid_items.map(i => `<span class="num">${fmt(i.value)}</span>`).join('')}</div>`;
+    } else {
+      body = `<table><tr><th>البند</th><th class="v">المبلغ</th><th class="v">%</th></tr>
+        ${d.items.map(i => `<tr><td>${esc(i.label)}</td><td class="num">${fmt(i.value)}</td><td class="num" style="color:var(--muted)">${pct(i.value,c.value).toFixed(0)}%</td></tr>`).join('')}</table>
+        ${d.notes.map(n => `<div class="note">${esc(n.label)}: <b class="num">${fmt(n.value)}</b> — غير محسوب ضمن المستحق</div>`).join('')}`;
+    }
+    return `<div class="card"><div class="co-head"><div><div class="co-name">${esc(c.name)}</div>
+      <span class="chip">${pct(c.value,TR).toFixed(1)}% من المستحق</span></div>
+      <div class="co-total">${money(c.value)}</div></div>${body}</div>`;
+  };
+
+  return `
+  <section class="kpis">
+    <div class="card kpi"><div class="lbl"><span class="dot" style="background:var(--accent)"></span>إجمالي المستحق لي</div>
+      <div class="val">${money(TR)}</div><div class="hint">${R.length} جهات • ${cos.length} شركات</div></div>
+    <div class="card kpi"><div class="lbl"><span class="dot" style="background:var(--neg)"></span>إجمالي الالتزامات</div>
+      <div class="val">${money(TD)}</div><div class="hint">${DB.length} بنود • ${pct(TD,TR).toFixed(0)}% من المستحق</div></div>
+    <div class="card kpi hero"><div class="lbl">الصافي بعد السداد</div>
+      <div class="val">${money(NET)}</div><div class="hint">${pct(NET,TR).toFixed(0)}% من المستحق يبقى لك</div></div>
+    <div class="card kpi"><div class="lbl"><span class="dot" style="background:var(--pos)"></span>نسبة التغطية</div>
+      <div class="val"><span class="num">${TD ? (TR/TD).toFixed(2) + '×' : '—'}</span></div><div class="hint">المستحق يغطي الالتزامات ${TD ? (TR/TD).toFixed(1) : '—'} مرة</div></div>
+  </section>
+  <section class="grid g-2">
+    <div class="card"><h2>المستحق لي حسب الجهة</h2><div class="desc">مرتّبة من الأكبر للأصغر — النسبة من إجمالي المستحق</div>
+      ${bars(R, TR, r => r.type === 'company' ? 'var(--accent)' : 'var(--c2)')}</div>
+    <div class="card"><h2>توزيع المستحقات</h2><div class="desc">شركات مقابل أفراد</div><div class="donut-wrap">${donut}</div></div>
+  </section>
+  <section class="grid g-2">
+    <div class="card"><h2>الميزان: المستحق مقابل الالتزامات</h2><div class="desc">بعد سداد كل الالتزامات من المستحقات، يتبقّى الصافي</div>
+      <div class="balance">
+        <div class="stack"><span style="flex-basis:${Math.min(pct(TD,TR),100)}%;background:var(--neg)">التزامات ${pct(TD,TR).toFixed(0)}%</span>
+          <span style="flex-basis:${Math.max(pct(NET,TR),0)}%;background:var(--pos)">صافي ${pct(NET,TR).toFixed(0)}%</span></div>
+        <div class="bal-legend"><span>المستحق <b class="num">${fmt(TR)}</b></span><span>−</span>
+          <span>الالتزامات <b class="num neg">${fmt(TD)}</b></span><span>=</span>
+          <span>الصافي <b class="num pos">${fmt(NET)}</b></span></div></div></div>
+    <div class="card"><h2>الالتزامات (المطلوب مني)</h2><div class="desc">مرتّبة من الأكبر للأصغر</div>${bars(DB, TD, () => 'var(--neg)')}</div>
+  </section>
+  <h3 class="sec">تفاصيل الشركات</h3>
+  <section class="grid g-3">${cos.map(company).join('')}</section>
+  <section class="card" style="margin-top:16px"><h2>كشف كامل</h2><div class="desc">كل البنود كما في الشيت</div>
+    <table class="tbl-all"><tr><th>الجهة</th><th>النوع</th><th class="v">المبلغ</th><th class="v">النسبة</th></tr>
+    ${R.map(r => `<tr><td>${esc(r.name)}</td><td><span class="tag ${r.type==='company'?'co':'pe'}">${r.type==='company'?'شركة — مستحق لي':'فرد — مستحق لي'}</span></td>
+      <td class="num">${fmt(r.value)}</td><td class="num">${pct(r.value,TR).toFixed(1)}%</td></tr>`).join('')}
+    <tr class="tot"><td>إجمالي المستحق</td><td></td><td class="num">${fmt(TR)}</td><td></td></tr>
+    ${DB.map(r => `<tr><td>${esc(r.name)}</td><td><span class="tag db">التزام علي</span></td>
+      <td class="num neg">(${fmt(r.value)})</td><td class="num">${pct(r.value,TD).toFixed(1)}%</td></tr>`).join('')}
+    <tr class="tot"><td>إجمالي الالتزامات</td><td></td><td class="num neg">(${fmt(TD)})</td><td></td></tr>
+    <tr class="tot"><td>الصافي</td><td></td><td class="num pos" style="font-size:16px">${fmt(NET)}</td><td></td></tr></table>
+  </section>`;
+}
+
+// ------------------------------------------------------------ generic workbook
+function renderGeneric(D){
+  const nets = D.sheets.flatMap(s => s.kpis.map(k => ({...k, sheet: s.name})));
+  const totalNet = nets.reduce((s,k) => s + k.value, 0);
+  const kpis = `<section class="kpis">
+    ${nets.length > 1 ? `<div class="card kpi hero"><div class="lbl">إجمالي الصافي</div><div class="val">${money(totalNet)}</div>
+      <div class="hint">${D.sheets.length} شغلانات</div></div>` : ''}
+    ${nets.map((k,i) => `<div class="card kpi"><div class="lbl"><span class="dot" style="background:${col(i)}"></span>${esc(k.label)} — ${esc(k.sheet)}</div>
+      <div class="val">${money(k.value)}</div>${nets.length > 1 ? `<div class="hint">${pct(k.value,totalNet).toFixed(0)}% من إجمالي الصافي</div>` : ''}</div>`).join('')}
+  </section>`;
+
+  const cell = (c, emph) => !c ? '<td></td>' : 'n' in c
+    ? `<td class="num${emph ? ' em' : ''}">${fmt(c.n)}</td>` : `<td>${esc(c.s)}</td>`;
+
+  const table = r => `<div class="card" style="grid-column:1/-1">${r.title ? `<h2>${esc(r.title)}</h2>` : ''}
+    <table><tr>${r.columns.map((h,i) => `<th class="${r.rows.some(x => x[i] && 'n' in x[i]) ? 'v' : ''}">${esc(h)}</th>`).join('')}</tr>
+    ${r.rows.map(x => `<tr>${x.map((c,i) => cell(c, r.emph.includes(i))).join('')}</tr>`).join('')}
+    ${r.totals ? `<tr class="tot">${r.columns.map((h,i) => i === 0 ? '<td>الإجمالي</td>' :
+        (i in r.totals ? `<td class="num em">${fmt(r.totals[i])}</td>` : '<td></td>')).join('')}</tr>` : ''}</table></div>`;
+
+  const calc = r => `<div class="card"><h2>${esc(r.title || r.total_label)}</h2><div class="desc">${r.op === 'x' ? 'حاصل ضرب' : 'مجموع'} البنود</div>
+    <div class="calc">${r.parts.map((p,i) => `${i ? `<span class="op">${r.op === 'x' ? '×' : '+'}</span>` : ''}
+      <div class="part"><small>${esc(p.label)}</small><b class="num">${fmt(p.value)}</b></div>`).join('')}</div>
+    ${r.op === '+' ? bars(r.parts.map(p => ({name: p.label, value: p.value})), r.total, (x,i) => col(i)) : ''}
+    <div class="calc-total" style="${r.op === '+' ? 'margin-top:14px' : ''}"><span>${esc(r.total_label)}</span><b>${money(r.total)}</b></div></div>`;
+
+  const waterfall = k => {
+    const top = Math.max(...k.steps.filter(s => s.sign > 0).map(s => s.value), k.value, 1);
+    let run = 0;
+    const rows = k.steps.map(s => {
+      const start = s.sign > 0 ? run : run - s.value;
+      run += s.sign * s.value;
+      return `<div class="wf-row"><div class="name">${esc(s.label)}</div>
+        <div class="track"><div class="wf-seg" style="inset-inline-start:${pct(start,top)}%;width:0" data-w="${pct(s.value,top)}"
+          data-bg="${s.sign > 0 ? 'var(--accent)' : 'var(--neg)'}"></div></div>
+        <div class="amt num ${s.sign < 0 ? 'neg' : ''}">${s.sign < 0 ? '−' : '+'}${fmt(s.value)}</div></div>`;
+    }).join('');
+    return `<div class="card" style="grid-column:1/-1"><h2>من الإيراد للصافي</h2><div class="desc">كل خصم بيتطرح من ${esc(k.steps[0].label)} لحد ما نوصل لـ${esc(k.label)}</div><div class="wf">${rows}
+      <div class="wf-row res"><div class="name">${esc(k.label)}</div>
+        <div class="track"><div class="wf-seg" style="inset-inline-start:0;width:0" data-w="${pct(k.value,top)}" data-bg="var(--pos)"></div></div>
+        <div class="amt num pos" style="font-size:16px">${fmt(k.value)}</div></div></div></div>`;
+  };
+
+  return kpis + D.sheets.map(s => `
+    <h3 class="sec">${esc(s.name)}</h3>
+    <section class="grid g-auto">
+      ${s.kpis.filter(k => k.steps).map(waterfall).join('')}
+      ${s.regions.map(r => r.kind === 'calc' ? calc(r) : table(r)).join('')}
+    </section>`).join('');
+}
+
+// ------------------------------------------------------------ boot
+function animate(scope){
+  requestAnimationFrame(() => setTimeout(() => scope.querySelectorAll('[data-w]').forEach(e => {
+    if (e.dataset.bg) e.style.background = e.dataset.bg;
+    e.style.width = e.dataset.w + '%';
+  }), 60));
+}
+
+function boot(DOC){
+  $('lock').style.display = 'none';
+  $('app').style.display = 'block';
+  $('meta').textContent = `تم التحديث: ${DOC.generated}`;
+  const tabs = $('tabs'), panels = $('panels');
+  DOC.tabs.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'tab'; b.textContent = t.title; b.dataset.id = t.id;
+    b.onclick = () => show(t.id);
+    tabs.appendChild(b);
+    const p = document.createElement('section');
+    p.className = 'panel'; p.id = 'p-' + t.id;
+    p.innerHTML = `<div class="panel-meta">المصدر: ${esc(t.source)} • آخر تعديل: ${esc(t.modified)}</div>` +
+      (t.kind === 'receivables' ? renderReceivables(t.data) : renderGeneric(t.data));
+    panels.appendChild(p);
+  });
+  function show(id){
+    if (!$('p-' + id)) id = DOC.tabs[0].id;
+    tabs.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+    panels.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + id));
+    store.set('acc-tab', id); history.replaceState(null, '', '#' + id);
+    animate($('p-' + id));
+  }
+  show(location.hash.slice(1) || store.get('acc-tab'));
+}
+
+// ------------------------------------------------------------ decryption
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function decrypt(P, pw){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(P.salt), iterations:P.iter, hash:'SHA-256'},
+    base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(P.iv)}, key, b64(P.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+if (PAYLOAD && PAYLOAD.enc) {
+  $('logoutBtn').style.display = '';
+  $('logoutBtn').onclick = () => { store.del('acc-pw'); location.reload(); };
+  const tryOpen = async (pw, silent) => {
+    try { const doc = await decrypt(PAYLOAD, pw);
+      if ($('remember').checked || silent) store.set('acc-pw', pw);
+      boot(doc); return true;
+    } catch (e) { if (!silent) $('pwErr').textContent = 'الباسورد غلط'; return false; }
+  };
+  $('lockForm').onsubmit = e => { e.preventDefault(); $('pwErr').textContent = ''; tryOpen($('pw').value, false); };
+  const saved = store.get('acc-pw');
+  (saved ? tryOpen(saved, true) : Promise.resolve(false)).then(ok => { if (!ok) { store.del('acc-pw'); $('lock').style.display = 'flex'; $('pw').focus(); } });
+} else {
+  boot(PAYLOAD);
+}
+</script>
+</body>
+</html>
