@@ -1,0 +1,33 @@
+name: Update dashboard
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-dashboard
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install openpyxl==3.1.5 cryptography==43.0.3
+      - id: build
+        run: python build/build.py
+        env:
+          DASH_PASSWORD: ${{ secrets.DASH_PASSWORD }}
+      - if: steps.build.outputs.stamp
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update ${{ steps.build.outputs.stamp }}"
+          git push
