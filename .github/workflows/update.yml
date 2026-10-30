@@ -1,8 +1,10 @@
 name: Update dashboard
 
+# The page already reads the sheets live; this keeps the saved copy fresh
+# for the first paint and for when the live link is unreachable.
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,14 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
-      - run: pip install openpyxl==3.1.5 cryptography==43.0.3
+          node-version: "20"
+      - run: npm ci --prefix build
       - id: build
-        run: python build/build.py
+        run: node build/build.mjs
         env:
           DASH_PASSWORD: ${{ secrets.DASH_PASSWORD }}
+          LIVE_URL: ${{ secrets.LIVE_URL }}
       - if: steps.build.outputs.stamp
         run: |
           git config user.name "github-actions[bot]"

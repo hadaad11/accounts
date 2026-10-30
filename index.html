@@ -51,6 +51,8 @@ svg{flex:none}
 .actions{display:flex;gap:6px}
 .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink-2)}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn.busy svg{animation:sp .9s linear infinite}
+.brand .sub.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--pos);margin-inline-end:6px;vertical-align:middle}
 .tabs{display:flex;gap:4px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{border:0;background:none;padding:9px 14px 11px;font-size:14.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;
@@ -309,6 +311,7 @@ footer{color:var(--muted);font-size:12px;margin-top:28px;text-align:center}
         <div style="min-width:0"><h1>لوحة الحسابات</h1><div class="sub" id="meta"></div></div>
       </div>
       <div class="actions">
+        <button class="icon-btn" id="syncBtn" title="تحديث من الشيت" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></button>
         <button class="icon-btn" id="themeBtn" title="تغيير الوضع"></button>
         <button class="icon-btn" onclick="window.print()" title="طباعة / PDF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg></button>
         <button class="icon-btn" id="logoutBtn" title="قفل" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
@@ -757,11 +760,11 @@ function animate(scope){
   }), 60));
 }
 
-function boot(DOC){
-  $('lock').style.display = 'none';
-  $('app').style.display = 'block';
-  $('meta').textContent = `آخر تحديث: ${DOC.generated}`;
-  const tabs = $('tabs'), panels = $('panels');
+let DOC = null, CUR = null;
+const tabs = $('tabs'), panels = $('panels');
+function render(){
+  tabs.innerHTML = ''; panels.innerHTML = '';
+  GEN.length = 0; Object.keys(PL).forEach(k => delete PL[k]);
   DOC.tabs.forEach(t => {
     const b = document.createElement('button');
     b.className = 'tab'; b.textContent = t.title; b.dataset.id = t.id;
@@ -777,17 +780,71 @@ function boot(DOC){
       `<footer>البيانات متشفّرة ومفيش حاجة بتتبعت لأي سيرفر • عرض السعر محفوظ على الجهاز ده بس</footer>`;
     panels.appendChild(p);
   });
-  function show(id){
-    if (!$('p-' + id)) id = DOC.tabs[0].id;
-    tabs.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.id === id));
-    panels.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + id));
-    store.set('acc-tab', id); history.replaceState(null, '', '#' + id);
-    const on = tabs.querySelector('.tab.on'); if (on) on.scrollIntoView({inline:'nearest', block:'nearest'});
-    window.scrollTo({top:0});
-    animate($('p-' + id)); quoteRefresh();
-  }
-  show(location.hash.slice(1) || store.get('acc-tab'));
 }
+function show(id, keepScroll){
+  if (!$('p-' + id)) id = DOC.tabs[0].id;
+  CUR = id;
+  tabs.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.id === id));
+  panels.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + id));
+  store.set('acc-tab', id); history.replaceState(null, '', '#' + id);
+  const on = tabs.querySelector('.tab.on'); if (on) on.scrollIntoView({inline:'nearest', block:'nearest'});
+  if (!keepScroll) window.scrollTo({top:0});
+  animate($('p-' + id)); quoteRefresh();
+}
+function boot(doc){
+  DOC = doc;
+  $('lock').style.display = 'none';
+  $('app').style.display = 'block';
+  render(); setMeta();
+  show(location.hash.slice(1) || store.get('acc-tab'));
+  if (DOC.live) { $('syncBtn').style.display = ''; liveSync(true); }
+}
+
+// ------------------------------------------------------------ live sync with the sheets
+// DOC.live is an Apps Script web app that returns the Excel files; only files whose
+// Drive timestamp changed since the last check come back with content.
+const LIVE = {at: 0, busy: false, stamps: {}, state: '', time: ''};
+function setMeta(){
+  const s = LIVE.state, m = $('meta');
+  m.textContent = s === 'live' ? `مباشر من الشيت • ${LIVE.time}` : s === 'sync' ? 'بيحدّث من الشيت…'
+    : s === 'error' ? `مش قادر أوصل للشيت — آخر نسخة: ${DOC.generated}` : `آخر تحديث: ${DOC.generated}`;
+  m.classList.toggle('live', s === 'live');
+  $('syncBtn').classList.toggle('busy', LIVE.busy);
+}
+const loadScript = src => new Promise((ok, no) => { const s = document.createElement('script');
+  s.src = src; s.onload = ok; s.onerror = () => no(new Error('load ' + src)); document.head.appendChild(s); });
+let libsP;
+const libs = () => libsP || (libsP = loadScript('vendor/xlsx.mini.min.js').then(() => loadScript('parse.js')).catch(e => { libsP = null; throw e; }));
+async function liveSync(force){
+  if (!DOC || !DOC.live || LIVE.busy || (!force && Date.now() - LIVE.at < 15000)) return;
+  LIVE.busy = true;
+  if (!LIVE.time) LIVE.state = 'sync';
+  setMeta();
+  try {
+    const known = Object.entries(LIVE.stamps).map(([k, v]) => k + ':' + v).join(',');
+    const url = DOC.live + (DOC.live.includes('?') ? '&' : '?') + 'known=' + encodeURIComponent(known);
+    const [res] = await Promise.all([fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }), libs()]);
+    let changed = false;
+    const next = DOC.tabs.map(t => {
+      const f = (res.files || {})[t.id];
+      if (!f || !f.b64) return t;
+      try {
+        const data = AccParse.parseWorkbook(XLSX.read(f.b64, {type: 'base64', sheetStubs: true}), t);
+        LIVE.stamps[t.id] = f.stamp;
+        if (AccParse.stable(data) === AccParse.stable(t.data)) return t;
+        changed = true;
+        return {...t, data, modified: f.modified || t.modified, edit_url: f.edit_url || t.edit_url};
+      } catch (e) { console.error(t.id, e); return t; }
+    });
+    LIVE.at = Date.now(); LIVE.state = 'live';
+    LIVE.time = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+    if (changed) { const y = scrollY; DOC = {...DOC, tabs: next}; render(); show(CUR, true); scrollTo(0, y); toast('اتحدّث من الشيت ✓'); }
+  } catch (e) { console.error(e); LIVE.state = 'error'; }
+  finally { LIVE.busy = false; setMeta(); }
+}
+$('syncBtn').onclick = () => liveSync(true);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') liveSync(); });
+setInterval(() => { if (document.visibilityState === 'visible') liveSync(); }, 60000);
 
 // ------------------------------------------------------------ decryption
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
